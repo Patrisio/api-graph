@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import {NODE_SIZE} from './graph/constants';
 import './App.css';
 
 let prevEntityName: string;
@@ -101,6 +102,11 @@ function App() {
          });
    };
 
+   const getScrollTop = (node: any) => {
+      return (node as Element)?.getBoundingClientRect().y + 
+         document.documentElement.scrollTop - (window.innerHeight / 2) - (NODE_SIZE / 2);
+   };
+
    const updateGraph = (foundNode: any) => {
       const filteredNodes = d3.selectAll('text')
          .filter((d: any, i: number): any => {
@@ -131,7 +137,7 @@ function App() {
             {
                color: foundNode.type,
                id,
-               scrollTop: (currentNode as Element)?.getBoundingClientRect().y + document.documentElement.scrollTop,
+               scrollTop: getScrollTop(currentNode),
             }
          ]));
          highlightCircleNodeById(id);
