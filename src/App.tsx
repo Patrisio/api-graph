@@ -31,7 +31,6 @@ function App() {
 
    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       setNodeName(event.target.value);
-      console.log(event.target.value);
    };
 
    const findNodeByName = (entityName: string, data: any): any => {
@@ -153,6 +152,11 @@ function App() {
 
          const entityName = e.target.value;
 
+         if (entityName === '') {
+            resetGraph();
+            return;
+         }
+
          if (prevEntityName === entityName) {
             if (foundEntitiesCount) {
                currentPointerIndex === prevHighlightedNodes.length - 1 ?
@@ -167,6 +171,15 @@ function App() {
 
          if (prevHighlightedNodes.length !== 0) {
             returnCicleNodesToInitialStyles();
+
+            if (currentPointerIndex !== null) {
+               disableAnimationToSelectedCircleNode(prevHighlightedNodes[(currentPointerIndex as number)].id);
+            }
+
+            if (currentPointerIndex === 0) {
+               disableAnimationToSelectedCircleNode(prevHighlightedNodes[(currentPointerIndex as number)].id);
+            }
+
             setPrevHighlightedNodes([]);
          }
          
@@ -199,7 +212,6 @@ function App() {
    };
 
    const resetGraph = () => {
-      console.log('reset');
       returnCicleNodesToInitialStyles();
       resetOpacityForAllNodes();
       setFoundEntitiesCount(null);
@@ -211,6 +223,16 @@ function App() {
       if (currentPointerIndex !== null) {
          return currentPointerIndex + 1;
       }
+   };
+
+   const activateAnimationToSelectedCircleNode = (id: string) => {
+      d3.select(`#circle-${id}`)
+         .style('animation', 'scaleUp 0.6s ease infinite');
+   };
+
+   const disableAnimationToSelectedCircleNode = (id: string) => {
+      d3.select(`#circle-${id}`)
+         .style('animation', 'none');
    };
 
    useEffect(() => {
@@ -238,9 +260,10 @@ function App() {
 
    useEffect(() => {
       if (prevHighlightedNodes.length > 0 && currentPointerIndex !== null) {
-         console.log(prevHighlightedNodes, 'prevHighlightedNodes');
-         console.log(currentPointerIndex, 'currentPointerIndex');
-         window.scroll(0, prevHighlightedNodes[currentPointerIndex].scrollTop);
+         const selectedNode = prevHighlightedNodes[currentPointerIndex];
+         window.scroll(0, selectedNode.scrollTop);
+         if (currentPointerIndex > 0) disableAnimationToSelectedCircleNode(prevHighlightedNodes[currentPointerIndex - 1].id);
+         activateAnimationToSelectedCircleNode(selectedNode.id);
       }
    }, [currentPointerIndex]);
 

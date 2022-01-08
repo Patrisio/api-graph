@@ -10,7 +10,7 @@ export default function Toolbar({
     return (
         <MUIToolbar>
             <Typography variant="h6" noWrap sx={{ flexGrow: 1 }} component="div">
-                Persistent drawer
+                Визуализация зависимостей в EMRM-API
             </Typography>
             <IconButton
                 color="inherit"
