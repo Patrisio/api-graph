@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import {NODE_SIZE} from './graph/constants';
 import './App.css';
+import { curveBasisClosed } from 'd3';
 
 let prevEntityName: string;
 
@@ -21,6 +22,7 @@ function App() {
   const [prevHighlightedNodes, setPrevHighlightedNodes] = useState<{color: string, id: string, scrollTop: number}[]>([]);
   const [foundEntitiesCount, setFoundEntitiesCount] = useState<number | null>(null);
   const [currentPointerIndex, setCurrentPointerIndex] = useState<number | null>(null);
+  // const [isSearching, setSearching] = useState<boolean>(false);
 
   const handleDrawerOpen = () => {
       setOpen(true);
@@ -56,7 +58,7 @@ function App() {
    };
 
    const makeNodesTransparent = (
-      id: number,
+      id: string,
       {
          circle = true,
          link = true,
@@ -82,7 +84,6 @@ function App() {
             .transition()
             .duration(700)
             .style('opacity', '1');
-      
 
       text ?
          d3.select(`#text-${id}`)
@@ -107,40 +108,63 @@ function App() {
          document.documentElement.scrollTop - (window.innerHeight / 2) - (NODE_SIZE / 2);
    };
 
-   const updateGraph = (foundNode: any) => {
-      const filteredNodes = d3.selectAll('text')
-         .filter((d: any, i: number): any => {
-            if (d.data.name === foundNode.name) {
-               makeNodesTransparent(i, {
-                  circle: false,
-                  link: true,
-                  text: false,
-               });
-               return true;
-            }
-            makeNodesTransparent(i, {
-               circle: true,
-               link: true,
-               text: true,
-            });
-         });
+    const recursiveTraverse = (depsIds: string[], children: any) => {
+        for (let node of children) {
+            depsIds.push(node.id);
+            recursiveTraverse(depsIds, node.children);
+        }
+    };
 
+   const updateGraph = (foundNode: any) => {
+        const foundNodeDepsIds: string[] = [];
+        const filteredNodes = d3.selectAll('text')
+            .filter((d: any, i: number): any => {
+                if (d.data.name === foundNode.name) {
+                    const foundNodeChildren = d.data.children;
+
+                    makeNodesTransparent(d.data.id, {
+                        circle: false,
+                        link: true,
+                        text: false,
+                    });
+
+                    if (foundNodeChildren.length > 0) {
+                        recursiveTraverse(
+                            foundNodeDepsIds,
+                            foundNodeChildren,
+                        );
+                    }
+                    
+                    return true;
+                }
+
+                foundNodeDepsIds.includes(d.data.id) ?
+                    makeNodesTransparent(d.data.id, {
+                        circle: false,
+                        link: false,
+                        text: false,
+                    }) :
+                    makeNodesTransparent(d.data.id, {
+                        circle: true,
+                        link: true,
+                        text: true,
+                    });                
+            });
       setFoundEntitiesCount(filteredNodes.size());
 
       const nodesList = filteredNodes.nodes();
-      filteredNodes.each(function(node: any, i: number) {
-         const textNodeId = (this as Element).getAttribute('id');
-         const id = textNodeId?.split('-')[1] || '';
-         const currentNode = nodesList[i];
-         setPrevHighlightedNodes(prev => ([
-            ...prev,
-            {
-               color: foundNode.type,
-               id,
-               scrollTop: getScrollTop(currentNode),
-            }
-         ]));
-         highlightCircleNodeById(id);
+			filteredNodes.each(({data: d3Node}: any, i: number) => {
+        const currentNode = nodesList[i];
+				setPrevHighlightedNodes(prev => ([
+					...prev,
+					{
+						id: d3Node.id,
+						color: d3Node.type,
+						children: d3Node.children,
+						scrollTop: getScrollTop(currentNode),
+					}
+				]));
+				highlightCircleNodeById(d3Node.id);
       });
    };
 
@@ -155,7 +179,6 @@ function App() {
    const highlightGraphLinksByNodeName = (e: any) => {
       if (e.key === 'Enter') {
          e.preventDefault();
-
          const entityName = e.target.value;
 
          if (entityName === '') {
@@ -190,6 +213,7 @@ function App() {
          }
          
          const foundNode = findNodeByName(entityName, graphData);
+         console.log(foundNode, '__FOUND_NODE__');
          if (foundNode) {
             updateGraph(foundNode);
             setCurrentPointerIndex(null);
@@ -209,7 +233,7 @@ function App() {
 
    const resetOpacityForAllNodes = () => {
       d3.selectAll('text').each((d: any, i: number) => {
-         makeNodesTransparent(i, {
+         makeNodesTransparent(d.data.id, {
             circle: false,
             link: false,
             text: false,
@@ -223,6 +247,7 @@ function App() {
       setFoundEntitiesCount(null);
       setNodeName('');
       setPrevHighlightedNodes([]);
+      disableAnimationToSelectedCircleNode(prevHighlightedNodes[(currentPointerIndex as number)].id);
    };
 
    const getCurrentPointerIndex = () => {
@@ -240,6 +265,12 @@ function App() {
       d3.select(`#circle-${id}`)
          .style('animation', 'none');
    };
+
+	// const highlightSelectedNodeDeps = (children: any) => {
+	// 	for (let node of children) {
+
+	// 	}
+	// };
 
    useEffect(() => {
       const getFrontApi = async () => {
@@ -259,18 +290,20 @@ function App() {
    }, [frontApi]);
 
    useEffect(() => {
-      if (prevHighlightedNodes.length > 0) {
-         setCurrentPointerIndex(0)
-      } 
+		if (prevHighlightedNodes.length > 0) {
+			setCurrentPointerIndex(0)
+		} 
    }, [prevHighlightedNodes]);
 
    useEffect(() => {
-      if (prevHighlightedNodes.length > 0 && currentPointerIndex !== null) {
-         const selectedNode = prevHighlightedNodes[currentPointerIndex];
-         window.scroll(0, selectedNode.scrollTop);
-         if (currentPointerIndex > 0) disableAnimationToSelectedCircleNode(prevHighlightedNodes[currentPointerIndex - 1].id);
-         activateAnimationToSelectedCircleNode(selectedNode.id);
-      }
+		if (prevHighlightedNodes.length > 0 && currentPointerIndex !== null) {
+			const selectedNode = prevHighlightedNodes[currentPointerIndex];
+			window.scroll(0, selectedNode.scrollTop);
+			console.log(selectedNode, '__selectedNode__');
+			if (currentPointerIndex > 0) disableAnimationToSelectedCircleNode(prevHighlightedNodes[currentPointerIndex - 1].id);
+			activateAnimationToSelectedCircleNode(selectedNode.id);
+			// highlightSelectedNodeDeps(selectedNode.children);
+		}
    }, [currentPointerIndex]);
 
   return (
@@ -297,21 +330,22 @@ function App() {
                onChange={handleChange}
                value={nodeName}
                onKeyPress={highlightGraphLinksByNodeName}
+              //  disabled={isSearching}
             />
             {
-               foundEntitiesCount !== null ?
-               foundEntitiesCount > 0 ?
-                  (
-                     <Typography variant="body2" gutterBottom>
-                        Найдено {foundEntitiesCount} совпадений ({getCurrentPointerIndex()}/{foundEntitiesCount})
-                     </Typography>
-                  ) :
-                  (
-                     <Typography variant="body2" gutterBottom>
-                        Cовпадений не найдено
-                     </Typography>
-                  ) :
-               null
+							foundEntitiesCount !== null /*&& !isSearching*/ ?
+							foundEntitiesCount > 0 ?
+								(
+										<Typography variant="body2" gutterBottom>
+											Найдено {foundEntitiesCount} совпадений ({getCurrentPointerIndex()}/{foundEntitiesCount})
+										</Typography>
+								) :
+								(
+										<Typography variant="body2" gutterBottom>
+											Cовпадений не найдено
+										</Typography>
+								) :
+							null
             }
             <Button
                variant="text"

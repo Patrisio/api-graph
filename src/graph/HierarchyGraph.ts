@@ -1,6 +1,7 @@
 import {rootNodeName, paths, requestBodySelector, responsesSelector, parametersSelector} from './paths';
 import {NODE_SIZE, COLORS, METHODS} from './constants';
 import {get} from 'lodash';
+import { nanoid } from '../utils'
 
 export default class HierarchyGraph {
     static components: any;
@@ -12,6 +13,7 @@ export default class HierarchyGraph {
         const rootNode: any = {
             name: rootNodeName(data),
             value: NODE_SIZE,
+            id: nanoid(),
             ...COLORS.rootNode,
             children: [],
         };
@@ -24,6 +26,7 @@ export default class HierarchyGraph {
             rootNode.children.unshift({
                 name: path,
                 value: NODE_SIZE,
+                id: nanoid(),
                 ...COLORS.pathNode,
                 children: [],
             });
@@ -69,8 +72,10 @@ export default class HierarchyGraph {
                 }
                 rootNode.children[0].children.push({
                     ...options,
+                    id: nanoid(),
                     ...this.getGraphChildrenNodes(dep.list, {
                         ...options,
+                        id: nanoid(),
                         ...(
                             dep.name === 'parameters' ?
                                 COLORS.parametersNode :
@@ -90,6 +95,7 @@ export default class HierarchyGraph {
         for (let [i, depItem] of dep.entries()) {
             depItem = {
                 ...options,
+                id: nanoid(),
                 ...depItem,
             };
             dep[i] = depItem;
@@ -182,6 +188,7 @@ export default class HierarchyGraph {
 
                     ref.unshift({
                         name: propsName,
+                        id: nanoid(),
                         children: [],
                     });
 
@@ -204,6 +211,7 @@ export default class HierarchyGraph {
                 const propertyData = (propsContent as any).items || propsContent;
                 let ref = {
                     name: propsName,
+                    id: nanoid(),
                     children: [],
                 };
 
@@ -220,6 +228,7 @@ export default class HierarchyGraph {
                 const propertyData = (propsContent as any).items || propsContent;
                 let ref = {
                     name: propsName,
+                    id: nanoid(),
                     children: [],
                 };
 
@@ -234,6 +243,7 @@ export default class HierarchyGraph {
                 const propertyData = (propsContent as any).items || propsContent;
                 let ref = {
                     name: propsName,
+                    id: nanoid(),
                     children: [],
                 };
 

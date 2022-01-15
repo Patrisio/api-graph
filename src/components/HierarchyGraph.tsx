@@ -39,7 +39,7 @@ export const HierarchyGraph = memo(function HierarchyGraph({
         const link = g.selectAll(".link")
             .data(nodes.descendants().slice(1))
             .enter().append("path")
-            .attr('id', (d: any, i: any): any => `link-${i}`)
+            .attr('id', (d: any, i: any): any => `link-${d.data.id}`)
             .attr("class", "link")
             .style("stroke", (d: any) => d.data.level)
             .attr("d", (d: any) => {
@@ -53,20 +53,20 @@ export const HierarchyGraph = memo(function HierarchyGraph({
         const node = g.selectAll(".node")
             .data(nodes.descendants())
             .enter().append("g")
-            .attr('id', (d: any, i: any): any => `group-${i}`)
+            .attr('id', (d: any, i: any): any => `group-${d.data.id}`)
             .attr("class", (d: any) => "node" + (d.children ? " node--internal" : " node--leaf"))
             .attr("transform", (d: any) => "translate(" + d.y + "," + d.x + ")");
 
         // adds the circle to the node
         node.append("circle")
-        .attr('id', (d: any, i: any): any => `circle-${i}`)
+        .attr('id', (d: any, i: any): any => `circle-${d.data.id}`)
         .attr("r", (d: any) => d.data.value)
         .style("stroke", (d: any) => d.data.type)
         .style("fill", (d: any) => d.data.level);
         
         // adds the text to the node
         node.append("text")
-            .attr('id', (d: any, i: any): any => `text-${i}`)
+            .attr('id', (d: any, i: any): any => `text-${d.data.id}`)
             .attr("dy", ".35em")
             .attr("x", (d: any) => d.children ? (d.data.value + 5) * -1 : d.data.value + 5)
             .attr("y", (d: any) => d.children && d.depth !== 0 ? -(d.data.value + 5) : d)
