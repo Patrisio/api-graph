@@ -1,6 +1,6 @@
 import {rootNodeName, paths, requestBodySelector, responsesSelector, parametersSelector} from './paths';
 import {NODE_SIZE, COLORS, METHODS} from './constants';
-import {get} from 'lodash';
+import {get, isBoolean} from 'lodash';
 import { nanoid } from '../utils'
 
 export default class HierarchyGraph {
@@ -189,6 +189,7 @@ export default class HierarchyGraph {
                     ref.unshift({
                         name: propsName,
                         id: nanoid(),
+                        ...this.getAdditionalData(propsContent),
                         children: [],
                     });
 
@@ -197,6 +198,24 @@ export default class HierarchyGraph {
             }
         }
     }
+
+    static getAdditionalData(data: any) {
+        const description = (data as any).description;
+        const maxItems = (data as any).maxItems;
+        const typeData = (data as any).type;
+        const required = (data as any).required;
+        const additionalProperties = (data as any).additionalProperties;
+
+        const additionalData = {
+            ...(description && { description }),
+            ...(maxItems && { maxItems }),
+            ...(typeData && { typeData }),
+            ...(required && { required }),
+            ...(isBoolean(additionalProperties) && { additionalProperties }),
+        };
+
+        return additionalData;
+    };
 
     static extractParameters({
         requestBodyDeps,
@@ -208,10 +227,13 @@ export default class HierarchyGraph {
             const propertiesRequestBody = Object.entries(requestBodyDeps.properties);
             
             for (let [propsName, propsContent] of propertiesRequestBody) {
+                console.log(propsContent, '__propsContent');
                 const propertyData = (propsContent as any).items || propsContent;
+                
                 let ref = {
                     name: propsName,
                     id: nanoid(),
+                    ...this.getAdditionalData(propsContent),
                     children: [],
                 };
 
@@ -229,6 +251,7 @@ export default class HierarchyGraph {
                 let ref = {
                     name: propsName,
                     id: nanoid(),
+                    ...this.getAdditionalData(propsContent),
                     children: [],
                 };
 
@@ -244,6 +267,7 @@ export default class HierarchyGraph {
                 let ref = {
                     name: propsName,
                     id: nanoid(),
+                    ...this.getAdditionalData(propsContent),
                     children: [],
                 };
 
