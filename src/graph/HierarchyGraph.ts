@@ -18,11 +18,7 @@ export default class HierarchyGraph {
             children: [],
         };
 
-        for (let entry of Object.entries(paths(data))) {
-            const path = entry[0];
-            if (path === '/mobile-log') {
-                console.log(path);
-            }
+        for (let [path, pathData] of Object.entries(paths(data))) {
             rootNode.children.unshift({
                 name: path,
                 value: NODE_SIZE,
@@ -30,7 +26,7 @@ export default class HierarchyGraph {
                 ...COLORS.pathNode,
                 children: [],
             });
-            const pathData = entry[1];
+
             const {
                 extractedData: {
                     requestBody,
@@ -58,18 +54,16 @@ export default class HierarchyGraph {
                     color: COLORS.parametersNode,
                 },
             ];
-            console.log(deps, '__RRRRRR__');
+
             for (let dep of deps) {
+                if (!dep.list.length) continue;
+
                 const options = {
                     name: dep.name,
                     value: NODE_SIZE,
                     ...dep.color,
                 };
-                if (!dep.list.length) continue;
-                if (dep.name === 'responses') {
-                    console.log(rootNode.children[0], 'rootNode.children[0]');
 
-                }
                 rootNode.children[0].children.push({
                     ...options,
                     id: nanoid(),
@@ -91,7 +85,6 @@ export default class HierarchyGraph {
     }
 
     static getGraphChildrenNodes(dep: any, options: any) {
-        console.log(dep, 'DEP');
         for (let [i, depItem] of dep.entries()) {
             depItem = {
                 ...options,
@@ -110,7 +103,6 @@ export default class HierarchyGraph {
     }
 
     static getDependenciesByPath(pathData: any) {
-        console.log(pathData);
         const {POST, GET} = METHODS;
 
         switch (Object.keys(pathData)[0]) {
@@ -134,13 +126,14 @@ export default class HierarchyGraph {
 
         const parametersRefsList = parametersSelector(pathData, method);
         const parametersDepsList = [];
+
         if (parametersRefsList) {
             for (let {$ref: ref} of parametersRefsList) {
-                const parametersDeps = this.extractDataByRef(ref)
+                const parametersDeps = this.extractDataByRef(ref);
                 parametersDepsList.push(parametersDeps);
             }
         }
-        console.log(responsesDeps, 'responsesDeps');
+
         const {
             requestBodyDepsParameters,
             responsesDepsParameters,
@@ -199,9 +192,11 @@ export default class HierarchyGraph {
         }
     }
 
-    static getAdditionalData(data: any) {
+    static getAdditionalDataValues(data: any) {
         const description = (data as any).description;
         const maxItems = (data as any).maxItems;
+        const maxLength = (data as any).maxLength;
+        const pattern = (data as any).pattern;
         const typeData = (data as any).type;
         const required = (data as any).required;
         const additionalProperties = (data as any).additionalProperties;
@@ -209,12 +204,25 @@ export default class HierarchyGraph {
         const additionalData = {
             ...(description && { description }),
             ...(maxItems && { maxItems }),
+            ...(maxLength && { maxLength }),
+            ...(pattern && { pattern }),
             ...(typeData && { typeData }),
             ...(required && { required }),
             ...(isBoolean(additionalProperties) && { additionalProperties }),
         };
 
         return additionalData;
+    }
+
+    static getAdditionalData(data: any) {
+        if (data.$ref) {
+            const entityContent = this.extractDataByRef(data.$ref);
+            if (!entityContent?.properties) {
+                return this.getAdditionalDataValues(entityContent);
+            }
+        }
+
+        return this.getAdditionalDataValues(data);
     };
 
     static extractParameters({
@@ -227,7 +235,6 @@ export default class HierarchyGraph {
             const propertiesRequestBody = Object.entries(requestBodyDeps.properties);
             
             for (let [propsName, propsContent] of propertiesRequestBody) {
-                console.log(propsContent, '__propsContent');
                 const propertyData = (propsContent as any).items || propsContent;
                 
                 let ref = {
@@ -251,7 +258,7 @@ export default class HierarchyGraph {
                 let ref = {
                     name: propsName,
                     id: nanoid(),
-                    ...this.getAdditionalData(propsContent),
+                    ...this.getAdditionalData(propertyData),
                     children: [],
                 };
 
