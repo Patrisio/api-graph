@@ -1,14 +1,15 @@
-import {rootNodeName, paths, requestBodySelector, responsesSelector, parametersSelector} from './paths';
-import {NODE_SIZE, COLORS, METHODS} from './constants';
+import React from 'react';
+import {rootNodeName, paths, requestBodySelector, responsesSelector, parametersSelector} from '../graph/selectors';
+import {NODE_SIZE, COLORS, METHODS} from '../graph/constants';
 import {get, isBoolean} from 'lodash';
-import { nanoid } from '../utils'
+import {nanoid} from '../../utils'
 
-export default class HierarchyGraph {
-    static components: any;
+let components: any;
 
-    public static generateSchema(data: any) {
+export default function useHierarchyGraphSchemaGenerator() {
+    const generateSchema = (data: any) => {
         console.log(data);
-        this.components = data.components;
+        components = data.components;
 
         const rootNode: any = {
             name: rootNodeName(data),
@@ -34,7 +35,7 @@ export default class HierarchyGraph {
                     parameters, 
                 },
                 entityName,
-            }: any = this.getDependenciesByPath(pathData);
+            }: any = getDependenciesByPath(pathData);
 
             const deps = [
                 {
@@ -67,7 +68,7 @@ export default class HierarchyGraph {
                 rootNode.children[0].children.push({
                     ...options,
                     id: nanoid(),
-                    ...this.getGraphChildrenNodes(dep.list, {
+                    ...getGraphChildrenNodes(dep.list, {
                         ...options,
                         id: nanoid(),
                         ...(
@@ -84,7 +85,7 @@ export default class HierarchyGraph {
         return rootNode;
     }
 
-    static getGraphChildrenNodes(dep: any, options: any) {
+    const getGraphChildrenNodes = (dep: any, options: any) => {
         for (let [i, depItem] of dep.entries()) {
             depItem = {
                 ...options,
@@ -95,41 +96,41 @@ export default class HierarchyGraph {
 
             const children = depItem.children;
             if (children?.length > 0) {
-                this.getGraphChildrenNodes(children, options);
+                getGraphChildrenNodes(children, options);
             }
         }
 
         return { children: dep };
     }
 
-    static getDependenciesByPath(pathData: any) {
+    const getDependenciesByPath = (pathData: any) => {
         const {POST, GET} = METHODS;
 
         switch (Object.keys(pathData)[0]) {
             case POST:
-                return this.extractDataByMethod(pathData, POST);
+                return extractDataByMethod(pathData, POST);
             case GET:
-                return this.extractDataByMethod(pathData, GET);
+                return extractDataByMethod(pathData, GET);
             default: 
                 return;
         }
     }
 
-    static extractDataByMethod(pathData: any, method: METHODS) {
+    const extractDataByMethod = (pathData: any, method: METHODS) => {
         const requestBodyRef = requestBodySelector(pathData, method);
-        const requestBodyDeps = this.extractDataByRef(requestBodyRef);
-        const requestBodyEntityName = this.extractEntityName(requestBodyRef);
+        const requestBodyDeps = extractDataByRef(requestBodyRef);
+        const requestBodyEntityName = extractEntityName(requestBodyRef);
 
         const responsesRef = responsesSelector(pathData, method);
-        const responsesDeps = this.extractDataByRef(responsesRef);
-        const responsesEntityName = this.extractEntityName(responsesRef);
+        const responsesDeps = extractDataByRef(responsesRef);
+        const responsesEntityName = extractEntityName(responsesRef);
 
         const parametersRefsList = parametersSelector(pathData, method);
         const parametersDepsList = [];
 
         if (parametersRefsList) {
             for (let {$ref: ref} of parametersRefsList) {
-                const parametersDeps = this.extractDataByRef(ref);
+                const parametersDeps = extractDataByRef(ref);
                 parametersDepsList.push(parametersDeps);
             }
         }
@@ -137,7 +138,7 @@ export default class HierarchyGraph {
         const {
             requestBodyDepsParameters,
             responsesDepsParameters,
-        } = this.extractParameters({
+        } = extractParameters({
             requestBodyDeps,
             responsesDeps,
             parametersDepsList,
@@ -157,7 +158,7 @@ export default class HierarchyGraph {
         };
     }
 
-    static extractDataByRef(ref: string) {
+    const extractDataByRef = (ref: string) => {
         if (!ref) return null;
         
         const requestBodyRef =
@@ -165,13 +166,13 @@ export default class HierarchyGraph {
                 .split('/')
                 .slice(2)
                 .join('.');
-        const requestBodyDeps = get(this.components, requestBodyRef, null);
+        const requestBodyDeps = get(components, requestBodyRef, null);
         return requestBodyDeps;
     }
 
-    static extractOtherDeps(propertyContent: any, propertyName: string, ref: any) {
+    const extractOtherDeps = (propertyContent: any, propertyName: string, ref: any) => {
         if (propertyContent.$ref) {
-            const entityContent = this.extractDataByRef(propertyContent.$ref);
+            const entityContent: any = extractDataByRef(propertyContent.$ref);
 
             if (entityContent?.properties) {
                 const propsEntities = Object.entries(entityContent.properties);
@@ -182,17 +183,17 @@ export default class HierarchyGraph {
                     ref.unshift({
                         name: propsName,
                         id: nanoid(),
-                        ...this.getAdditionalData(propsContent),
+                        ...getAdditionalData(propsContent),
                         children: [],
                     });
 
-                    this.extractOtherDeps(propertyData, propsName, ref[0].children);
+                    extractOtherDeps(propertyData, propsName, ref[0].children);
                 }
             }
         }
     }
 
-    static getAdditionalDataValues(data: any) {
+    const getAdditionalDataValues = (data: any) => {
         const description = (data as any).description;
         const maxItems = (data as any).maxItems;
         const maxLength = (data as any).maxLength;
@@ -214,22 +215,22 @@ export default class HierarchyGraph {
         return additionalData;
     }
 
-    static getAdditionalData(data: any) {
+    const getAdditionalData = (data: any) => {
         if (data.$ref) {
-            const entityContent = this.extractDataByRef(data.$ref);
+            const entityContent: any = extractDataByRef(data.$ref);
             if (!entityContent?.properties) {
-                return this.getAdditionalDataValues(entityContent);
+                return getAdditionalDataValues(entityContent);
             }
         }
 
-        return this.getAdditionalDataValues(data);
+        return getAdditionalDataValues(data);
     };
 
-    static extractParameters({
+    const extractParameters =({
         requestBodyDeps,
         responsesDeps,
         parametersDepsList,
-    }: any) {
+    }: any) =>  {
         const propertiesRequestBodyRefsList = [];
         if (requestBodyDeps?.properties) {
             const propertiesRequestBody = Object.entries(requestBodyDeps.properties);
@@ -240,11 +241,11 @@ export default class HierarchyGraph {
                 let ref = {
                     name: propsName,
                     id: nanoid(),
-                    ...this.getAdditionalData(propsContent),
+                    ...getAdditionalData(propsContent),
                     children: [],
                 };
 
-                this.extractOtherDeps(propertyData, propsName, ref.children);
+                extractOtherDeps(propertyData, propsName, ref.children);
                 propertiesRequestBodyRefsList.push(ref);
             }
         }
@@ -258,15 +259,15 @@ export default class HierarchyGraph {
                 let ref = {
                     name: propsName,
                     id: nanoid(),
-                    ...this.getAdditionalData(propertyData),
+                    ...getAdditionalData(propertyData),
                     children: [],
                 };
 
-                this.extractOtherDeps(propertyData, propsName, ref.children);
+                extractOtherDeps(propertyData, propsName, ref.children);
                 propertiesResponsesDepsRefsList.push(ref);
             }
         } else {
-            const universalResponseEntityContent = this.extractDataByRef(responsesDeps.allOf[0].$ref);
+            const universalResponseEntityContent: any = extractDataByRef(responsesDeps.allOf[0].$ref);
             const propertiesResponsesDeps = Object.entries(universalResponseEntityContent.properties);
 
             for (let [propsName, propsContent] of propertiesResponsesDeps) {
@@ -274,11 +275,11 @@ export default class HierarchyGraph {
                 let ref = {
                     name: propsName,
                     id: nanoid(),
-                    ...this.getAdditionalData(propsContent),
+                    ...getAdditionalData(propsContent),
                     children: [],
                 };
 
-                this.extractOtherDeps(propertyData, propsName, ref.children);
+                extractOtherDeps(propertyData, propsName, ref.children);
                 propertiesResponsesDepsRefsList.push(ref);
             }
         }
@@ -289,11 +290,15 @@ export default class HierarchyGraph {
         };
     }
 
-    static extractEntityName(ref: string) {
+    const extractEntityName = (ref: string) => {
         if (!ref) return null;
 
         const requestBodyRefArray = ref.split('/');
         const entityName = requestBodyRefArray[requestBodyRefArray.length - 1];
         return entityName;
     }
+
+    return {
+        generateSchema,
+    };
 }

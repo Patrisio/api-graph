@@ -1,31 +1,17 @@
 import React, {isValidElement} from 'react';
-import TreeView from '@mui/lab/TreeView';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import DepsTreeView from '../views/DepsTreeView';
 import TreeItem from '@mui/lab/TreeItem';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import {isBoolean, isArray} from 'lodash';
 
-type DepsTreeProps = {
-    data: any,
+type DepsTreeContainerType = {
+    deps: any,
 };
 
-export default function DepsTree({
-    data,
-}: DepsTreeProps) {
-    const TreeViewUI = ({children}: any) => {
-        return (
-            <TreeView
-                defaultCollapseIcon={<ExpandMoreIcon />}
-                defaultExpandIcon={<ChevronRightIcon />}
-                sx={{ height: 240, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
-            >
-                {children}
-            </TreeView>
-        );
-    };
-
+export default function DepsTreeContainer({
+    deps,
+}: DepsTreeContainerType) {
     const depDescription = (depPropsList: any[]) => {
         return depPropsList.map(({id, name, value}) => {
             return value && value !== 'undefined' &&
@@ -44,7 +30,7 @@ export default function DepsTree({
                                 label={name}
                             />
                             <Typography
-                                variant="body2"
+                                variant='body2'
                                 gutterBottom
                                 sx={{ marginBottom: '0' }}
                             >
@@ -96,7 +82,7 @@ export default function DepsTree({
                 break;
             }
         }
-        console.log(hasValidReactElement, 'hasValidReactElement');
+
         return hasValidReactElement;
     };
 
@@ -138,7 +124,6 @@ export default function DepsTree({
             ];
 
             const descriptionPropList = depDescription(depPropsList);
-            console.log(descriptionPropList, 'descriptionPropList');
 
             hasValidReactElement(descriptionPropList) ?
                 treeItemsList.push(
@@ -157,15 +142,9 @@ export default function DepsTree({
         return treeItemsList;
     };
 
-    const renderTreeView = (deps: any) => {
-        const { name, children, id, maxItems, typeData, required } = deps;
-        console.log(deps, '__DEEEEEPS__');
-        return (
-            <TreeViewUI>
-                {renderTreeItems(children)}
-            </TreeViewUI>
-        )
-    };
-
-    return renderTreeView(data);
-};
+    return (
+        <DepsTreeView>
+            {renderTreeItems(deps)}
+        </DepsTreeView>
+    );
+}

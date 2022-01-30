@@ -6,6 +6,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.2.5",
+    "@mui/lab": "^5.0.0-alpha.65",
     "@mui/material": "^5.2.7",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
@@ -37,7 +38,7 @@
       "react-app/jest"
     ]
   },
-  "proxy": "http://localhost:8080",
+  "proxy": "http://localhost:8287",
   "browserslist": {
     "production": [
       ">0.2%",

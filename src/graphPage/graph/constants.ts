@@ -26,7 +26,10 @@ export const COLORS = {
         level: 'orange',
     },
 }
+
 export enum METHODS {
     GET = 'get',
     POST = 'post',
 };
+
+export const GRAPH_ROOT_CLASS_NAME = 'hierarchy-graph-root';

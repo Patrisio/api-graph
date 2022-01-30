@@ -10,13 +10,13 @@ export default function Toolbar({
 }: any) {
     return (
         <MUIToolbar>
-            <Typography variant="h6" noWrap sx={{ flexGrow: 1 }} component="div">
+            <Typography variant='h6' noWrap sx={{ flexGrow: 1 }} component='div'>
                 Визуализация зависимостей в EMRM-API
             </Typography>
             <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                edge="end"
+                color='inherit'
+                aria-label='open drawer'
+                edge='end'
                 onClick={handleOpen}
                 sx={{ ...(open && { display: 'none' }) }}
             >
