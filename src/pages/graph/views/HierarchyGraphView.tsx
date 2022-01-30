@@ -1,5 +1,5 @@
 import React from 'react';
-import {GRAPH_ROOT_CLASS_NAME} from '../graph/constants';
+import {GRAPH_ROOT_CLASS_NAME} from '../common/constants';
 
 export default function HierarchyGraphView() {
     return (

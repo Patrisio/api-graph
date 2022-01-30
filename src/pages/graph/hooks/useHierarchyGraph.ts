@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import * as d3 from 'd3';
-import {findNodeByName, recursiveTraverse} from '../../utils';
-import {NODE_SIZE} from '../graph/constants';
+import {findNodeByName, recursiveTraverse} from '../../../utils';
+import {NODE_SIZE} from '../common/constants';
 import useD3Selection from './useD3Selection';
 import useHierarchyGraphSchemaGenerator from './useHierarchyGraphSchemaGenerator';
 

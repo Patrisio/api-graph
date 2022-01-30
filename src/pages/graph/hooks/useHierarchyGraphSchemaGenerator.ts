@@ -1,8 +1,8 @@
 import React from 'react';
-import {rootNodeName, paths, requestBodySelector, responsesSelector, parametersSelector} from '../graph/selectors';
-import {NODE_SIZE, COLORS, METHODS} from '../graph/constants';
+import {rootNodeName, paths, requestBodySelector, responsesSelector, parametersSelector} from '../common/selectors';
+import {NODE_SIZE, COLORS, METHODS} from '../common/constants';
 import {get, isBoolean} from 'lodash';
-import {nanoid} from '../../utils'
+import {nanoid} from '../../../utils'
 
 let components: any;
 

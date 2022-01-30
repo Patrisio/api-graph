@@ -1,5 +1,5 @@
 import React, {useState, ChangeEvent} from 'react';
-import {DepsTreeContainer} from '../containers/DepsTreeContainer';
+import {DepsTreeContainer} from './DepsTreeContainer';
 import { isNumber } from 'lodash';
 import SidebarContentView from '../views/SidebarContentView';
 
