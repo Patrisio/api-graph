@@ -1,4 +1,4 @@
-import React, {isValidElement} from 'react';
+import React, {isValidElement, memo} from 'react';
 import DepsTreeView from '../views/DepsTreeView';
 import TreeItem from '@mui/lab/TreeItem';
 import Box from '@mui/material/Box';
@@ -7,11 +7,16 @@ import {isBoolean, isArray} from 'lodash';
 
 type DepsTreeContainerType = {
     deps: any,
+    isVisibleDepsTree: boolean,
 };
 
-export default function DepsTreeContainer({
+const areEqualProps = (prev: any, next: any) =>
+    prev.isVisibleDepsTree === next.isVisibleDepsTree;
+
+export const DepsTreeContainer = memo(({
     deps,
-}: DepsTreeContainerType) {
+    isVisibleDepsTree
+}: DepsTreeContainerType) => {
     const depDescription = (depPropsList: any[]) => {
         return depPropsList.map(({id, name, value}) => {
             return value && value !== 'undefined' &&
@@ -143,8 +148,9 @@ export default function DepsTreeContainer({
     };
 
     return (
+        isVisibleDepsTree ?
         <DepsTreeView>
             {renderTreeItems(deps)}
-        </DepsTreeView>
+        </DepsTreeView> : null
     );
-}
+}, areEqualProps)

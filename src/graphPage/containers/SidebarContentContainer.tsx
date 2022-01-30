@@ -1,5 +1,5 @@
 import React, {useState, ChangeEvent} from 'react';
-import DepsTreeContainer from '../containers/DepsTreeContainer';
+import {DepsTreeContainer} from '../containers/DepsTreeContainer';
 import { isNumber } from 'lodash';
 import SidebarContentView from '../views/SidebarContentView';
 
@@ -24,6 +24,9 @@ export default function SidebarContentContainer({
     handleGraph,
     resetGraph,
 }: SidebarContentProps) {
+    const depsTreeData = prevHighlightedNodes[currentPointerIndex as number]?.children;
+    const isVisibleDepsTree = prevHighlightedNodes.length > 0 && isNumber(currentPointerIndex);
+    console.log(isVisibleDepsTree, 'isVisibleDepsTree__UP');
     const [nodeName, setNodeName] = useState<string>('');
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -67,23 +70,16 @@ export default function SidebarContentContainer({
             'Cовпадений не найдено';
     };
 
-    const DepsTreeUI = () => {
-        const isVisibleDepsTree = prevHighlightedNodes.length > 0 && isNumber(currentPointerIndex);
-        const depsTreeData= prevHighlightedNodes[currentPointerIndex as number]?.children;
-
-        return (
-            isVisibleDepsTree ?
-            <DepsTreeContainer
-               deps={depsTreeData}
-            /> : null
-        );
-    };
-
     return (
         <SidebarContentView
             nodeName={nodeName}
             isDisabledResetButton={prevHighlightedNodes.length === 0}
-            depsTreeUI={<DepsTreeUI />}
+            depsTreeUI={
+                <DepsTreeContainer
+                    deps={depsTreeData}
+                    isVisibleDepsTree={isVisibleDepsTree}
+                />
+            }
             isVisibleCoincidenceNotice={foundEntitiesCount !== null}
             coincidenceNoticeText={getCoincidenceNoticeText()}
             highlightGraphLinksByNodeName={highlightGraphLinksByNodeName}

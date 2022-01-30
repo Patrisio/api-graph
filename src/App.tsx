@@ -46,7 +46,7 @@ export default function App() {
 	}, [frontApi]);
 
 	return (
-		<div className='outer'>
+		<>
 			<Toolbar
 				handleOpen={handleDrawerOpen}
 				open={isDrawerOpen}
@@ -69,6 +69,6 @@ export default function App() {
 				graphWidth={isDrawerOpen ? 1350 : 1800}
 				data={graphData}
 			/>
-		</div>
+		</>
 	);
 }
