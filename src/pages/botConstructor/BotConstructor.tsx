@@ -1,6 +1,7 @@
 import React from 'react';
 import {Sprite, Stage, Container, Text} from 'react-pixi-fiber';
 import DraggableContainer from './DraggableContainer';
+import Rect from './Rect';
 import * as PIXI from 'pixi.js';
 import logo192 from '../../assets/logo192.png';
 
@@ -42,25 +43,20 @@ export default function BotConstructor() {
     
     return (
         <>
-            <Stage options={{ backgroundColor: 0x10bb99, height: 500, width: 500 }}>
+            <Stage options={{ backgroundColor: 0xe3e3e3, height: 1000, width: 1000 }}>
                 <DraggableContainer
-                    pivotXExternal={pivotX}
-                    pivotYExternal={pivotY}
-
-                    posXExternal={posX}
-                    posYExternal={posY}
-
-                    lastX={lastX}
-                    lastY={lastY}
-
                     setLastX={setLastX}
                     setLastY={setLastY}
-
-                    setPivotX={setPivotX}
-                    setPivotY={setPivotY}
                 >
-                    {/* <Bunny x={200} y={500} /> */}
-                    <Text text={`hiu iy353`} style={{ fill: 0xffff00, fontSize: 14 }} x={lastX} y={lastY} />
+                    <Rect
+                        x={lastX}
+                        y={lastY}
+                        width={100}
+                        height={100}
+                        bg={0xff0000}
+                    />
+                    <Bunny x={lastX} y={lastY} />
+                    <Text text={`hiu iy353`} style={{ fill: 0x000000, fontSize: 14 }} x={lastX} y={lastY} />
                 </DraggableContainer>
             </Stage>
 
