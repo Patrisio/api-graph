@@ -23,6 +23,8 @@ export class Behavior {
     instance.interactive = true;
     instance.cursor = "pointer";
     console.log(instance);
+    console.log(instance.children[0].children[0].getBounds(), 'PIZ');
+    // console.log(instance.children[0].children[1].getBounds(), 'PIZ_2');
 
     let draggedObject: any = null;
 
@@ -35,7 +37,9 @@ export class Behavior {
       draggedObject.position.x = newPosition.x;
       draggedObject.position.y = newPosition.y;
       console.log(instance.children[0].getBounds(), 'instance.children[0]77777777777777');
-      const globalTextObj = instance.children[0].getBounds();
+      
+      const globalTextObj = instance.children[0].children[0].getBounds();
+      console.log(globalTextObj, 'globalTextObj');
       console.log(newPosition.x, 'newPosition.x_START');
       console.log(globalTextObj.x, 'globalTextObj.x_START');
       this.lastPivotX = newPosition.x - globalTextObj.x;

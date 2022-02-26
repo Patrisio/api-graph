@@ -1,20 +1,18 @@
-import React from 'react';
-import {Sprite, Stage, Container, Text} from 'react-pixi-fiber';
+import React, {useState, useCallback, useRef, ReactElement, useMemo, useEffect} from 'react';
+import {Stage} from 'react-pixi-fiber';
 import DraggableContainer from './DraggableContainer';
+import MessageContainer from './MessageContainer';
+import {HeaderContainer} from './HeaderContainer';
 import Rect from './Rect';
-import * as PIXI from 'pixi.js';
-import logo192 from '../../assets/logo192.png';
 
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Slider from '@mui/material/Slider';
 
+const rectPadding = 15;
 
 export default function BotConstructor() {
-    function Bunny(props: any) {
-        return <Sprite texture={PIXI.Texture.from(logo192)} {...props} />;
-    }
-
     const [pivotX, setPivotX] = React.useState<number>(0);
     const [pivotY, setPivotY] = React.useState<number>(0);
 
@@ -24,8 +22,11 @@ export default function BotConstructor() {
     const [lastX, setLastX] = React.useState(15);
     const [lastY, setLastY] = React.useState(5);
 
+    const [cardHeight, setCardHeight] = useState(0);
+    const [contentItems, setContentItems] = useState<any[]>([]);
+    const [blockTypes, setBlockTypes] = useState(['header', 'message', 'message', 'message']);
+
     const handleChange = (event: Event, newValue: number | number[], coord: string) => {
-        console.log(newValue, '__NEW__');
         switch (coord) {
             case 'x':
                 setPivotX(newValue as number);
@@ -40,6 +41,79 @@ export default function BotConstructor() {
                 setPosY(newValue as number);
         }
     };
+
+    const addBlock = () => {
+        setBlockTypes(prev => [...prev, 'message']);
+    };
+
+    const removeBlock = () => {
+        setBlockTypes(prev => {
+            console.log(prev.filter((item, idx) => idx !== 0), 'prev.filter((item, idx) => idx !== 0)');
+            return prev.filter((item, idx) => idx !== 0);
+        });
+    };
+
+    const refs = useRef<any[]>([]);
+
+    const calculateCardHeight = (elements: ReactElement[]) => {
+        return elements.reduce((acc: number, element: any) => {
+            console.log(element.height, 'element.height');
+            return acc + element.height;
+        }, 0);
+    };
+
+    const cardContent = useMemo(() => {
+        const calculatePrevBlocksHeight = (index: number) => {
+            const getPrevBlockHeight = (prevBlocks: ReactElement[]) => {
+                return calculateCardHeight(prevBlocks);
+            };
+
+            return index !== 0 ? getPrevBlockHeight(contentItems.slice(0, index)) : 0;
+        };
+
+        const getReactElementByBlockType = (blockType: string, props: any) => {
+            switch (blockType) {
+                case 'header':
+                    return (
+                        <HeaderContainer
+                            {...props}
+                        />
+                    )
+                default:
+                    return (
+                        <MessageContainer
+                            rectPadding={rectPadding}
+                            {...props}
+                        />
+                    );
+            }
+        };
+
+        return blockTypes.map((blockType, index) => {
+            const ref = (element: ReactElement) => {
+                refs.current[index] = element;
+            };
+
+            return getReactElementByBlockType(blockType, {
+                ref,
+                key: index,
+                lastX,
+                lastY,
+                prevBlocksHeight: calculatePrevBlocksHeight(index),
+                verticalMargin: rectPadding * (index + 1),
+            });
+        });
+    }, [lastX, lastY, contentItems, blockTypes]);
+
+    useEffect(() => {
+        refs.current = [];
+
+        setTimeout(() => {
+            const cardHeight = calculateCardHeight(refs.current);
+            setCardHeight(cardHeight);
+            setContentItems(refs.current);
+        }, 0);
+    }, [blockTypes]);
     
     return (
         <>
@@ -51,14 +125,26 @@ export default function BotConstructor() {
                     <Rect
                         x={lastX}
                         y={lastY}
-                        width={100}
-                        height={100}
-                        bg={0xff0000}
-                    />
-                    <Bunny x={lastX} y={lastY} />
-                    <Text text={`hiu iy353`} style={{ fill: 0x000000, fontSize: 14 }} x={lastX} y={lastY} />
+                        width={350}
+                        height={cardHeight + (rectPadding * (contentItems.length + 1))}
+                        bg={0xffffff}
+                    >
+                        {cardContent}
+                    </Rect>
                 </DraggableContainer>
             </Stage>
+
+            <Button
+                onClick={addBlock}
+            >
+                Add block
+            </Button>
+
+            <Button
+                onClick={removeBlock}
+            >
+                Remove block
+            </Button>
 
             <Box sx={{ width: 200 }}>
                 <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
