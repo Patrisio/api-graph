@@ -3,10 +3,12 @@ import { CustomPIXIComponent } from "react-pixi-fiber";
 import * as PIXI from "pixi.js";
 
 const areEquals = () => {
+    console.log('PIDR');
     return true;
 };
 
 const TYPE = "Rect";
+
 export class Behavior extends PIXI.Graphics {
     customDisplayObject(props: any) {
         return new PIXI.Graphics();
@@ -18,6 +20,7 @@ export class Behavior extends PIXI.Graphics {
         // if (typeof oldProps !== "undefined") {
         //     instance.clear();
         // }
+        console.log(height, '__RRRRRRR____');
         console.log(`X: ${x} Y: ${y}`);
         // instance.children[0].height(500);
         // console.log(instance?.height(500), 'PROTO');
@@ -32,4 +35,4 @@ export class Behavior extends PIXI.Graphics {
     }
 };
 
-export default memo(CustomPIXIComponent(new Behavior(), TYPE), areEquals);
+export default CustomPIXIComponent(new Behavior(), TYPE);

@@ -22,7 +22,7 @@ export class Behavior {
   customDidAttach(instance: any) {
     instance.interactive = true;
     instance.cursor = "pointer";
-    console.log(instance);
+    console.log(instance, '__MAIN_INS__');
     console.log(instance.children[0].children[0].getBounds(), 'PIZ');
     // console.log(instance.children[0].children[1].getBounds(), 'PIZ_2');
 
