@@ -1,6 +1,5 @@
-import { TrendingUpTwoTone } from '@mui/icons-material';
 import React, {useEffect, useState, forwardRef, useRef, memo, useMemo} from 'react';
-import {Sprite, Stage, Container, Text} from 'react-pixi-fiber';
+import {Container, Text} from 'react-pixi-fiber';
 import Rect from './Rect';
 
 type MessageContainerProps = {
@@ -10,12 +9,8 @@ type MessageContainerProps = {
     lastY: number;
     rectPadding: number;
     extraPadding: number,
-    prevBlocksHeight?: number;
-    verticalMargin?: number;
+    prevBlocksHeight: number;
     text: string;
-    height: number;
-    calculatePrevBlocksHeight: any,
-    onChangeHeight: (height: number, order: number) => void;
 };
 
 const areEquals = (prev: any, next: any) => {
@@ -31,41 +26,16 @@ export default memo(forwardRef<Container, MessageContainerProps>(function Messag
     lastY,
     rectPadding,
     extraPadding,
-    // prevBlocksHeight = 0,
-    verticalMargin = 0,
+    prevBlocksHeight = 0,
     text,
-    height,
-    calculatePrevBlocksHeight,
-    onChangeHeight,
 }, ref) {
-    // console.log(prevBlocksHeight, '__prevBlocksHeight__');
-    // console.log(id, '__ID__MESSAGE');
-    const [h, setH] = useState(0);
-    const [prevBlocksHeight, setPrevBlocksHeight] = useState(0);
+    const [height, setHeight] = useState(0);
     const textRef = useRef<any>();
-    const rectRef = useRef<any>();
 
     useEffect(() => {
-        console.log(text, '__TEXT__');
         const height = textRef.current.height;
-        const rectHeight = rectRef.current.height;
-        // console.log(rectRef.current.getGlobalPosition(), 'rectRef.current');
-        // console.log(rectHeight, 'rectHeight__');
-        // console.log(height, '__textRef__');
-        // console.log(id, 'ORDER__');
-        // console.log(order, '__ORDER__');
-        // onChangeHeight(height, id);
-        // console.log(verticalMargin, 'verticalMargin');
-        // console.log(prevBlocksHeight, '__prevBlocksHeight');
-        // console.log(lastY + verticalMargin + prevBlocksHeight, 'lastY + verticalMargin + prevBlocksHeight');
-        // console.log(height, 'height__co');
-        setH(height);
-        // console.log(calculatePrevBlocksHeight(order), 'calculatePrevBlocksHeight(order)');
-        setPrevBlocksHeight(calculatePrevBlocksHeight(order));
-
-        console.log(extraPadding / 15, 'AAAAAAAA');
-        console.log(lastY + calculatePrevBlocksHeight(order) + extraPadding, 'PIZDA');
-    }, []);
+        setHeight(height);
+    }, [text]);
 
     return useMemo(() => (
         <Container
@@ -75,10 +45,9 @@ export default memo(forwardRef<Container, MessageContainerProps>(function Messag
         >
             <Rect
                 width={350 - (rectPadding * 2)}
-                height={h + (rectPadding * 2)}
+                height={height + (rectPadding * 2)}
                 bg={0xf0f0f0}
                 borderRadius={15}
-                ref={rectRef}
             >
                 <Text
                     text={text}
@@ -94,6 +63,6 @@ export default memo(forwardRef<Container, MessageContainerProps>(function Messag
                 />
             </Rect>
         </Container>
-        ), [h]
+        ), [height]
     );
 }), areEquals);

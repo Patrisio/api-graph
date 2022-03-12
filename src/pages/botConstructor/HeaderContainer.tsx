@@ -46,10 +46,6 @@ export const HeaderContainer = memo(
             fontSize: 16,
         }), []);
 
-        useEffect(() => {
-            console.log('HEQADER_MOUNTED');
-        }, []);
-
         return (
             <Container
                 x={lastX}

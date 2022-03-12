@@ -17,6 +17,7 @@ import Slider from '@mui/material/Slider';
 const rectPadding = 15;
 const mockText = 'TypeORM is an ORM that can run in NodeJS, Browser, Cordova, PhoneGap, Ionic, React Native, NativeScript, Expo, and Electron platforms and can be used with TypeScript and JavaScript (ES5, ES6, ES7, ES8). Its goal is to always support the latest JavaScript features and provide additional';
 let lastRectPaddingSum = 0;
+const borderColor = '0x4d4dff';
 
 export default function BotConstructor() {
     const [pivotX, setPivotX] = React.useState<number>(0);
@@ -28,10 +29,9 @@ export default function BotConstructor() {
     const [lastX, setLastX] = React.useState(15);
     const [lastY, setLastY] = React.useState(5);
 
-    const [messageContainerHeight, setMessageContainerHeight] = useState(0);
-
     const [cardHeight, setCardHeight] = useState(0);
     const [contentItems, setContentItems] = useState<any[]>([]);
+    const [isVisibleBorder, setVisibleBorder] = useState(false);
     const [blockTypes, setBlockTypes] = useState<any[]>([
         {
             id: nanoid(),
@@ -106,7 +106,6 @@ export default function BotConstructor() {
 
     const removeBlock = () => {
         setBlockTypes(prev => {
-            console.log(prev.filter((item, idx) => idx !== 0), 'prev.filter((item, idx) => idx !== 0)');
             return prev.filter((item, idx) => idx !== 0);
         });
     };
@@ -129,44 +128,17 @@ export default function BotConstructor() {
 
     const refs = useRef<any[]>([]);
 
-    const onChangeHeight = useCallback((height: number, order: string) => {
-        // setMessageContainerHeight(height);
-        // console.log(height, 'uuuuuuuuuuuuuu');
-        // console.log(blockTypes);
-
-        // const foundIndex = blockTypes.findIndex((block) => block.id === order);
-        // console.log(blockTypes);
-        // console.log(order);
-        // console.log(foundIndex, 'foundIndex');
-        // setBlockTypes((prev: any) => {
-        //     prev.splice(foundIndex, 1, {
-        //         id: order,
-        //         type: 'message',
-        //         props: {
-        //             ...(prev[foundIndex].props),
-        //             height,
-        //         },
-        //     });
-        //     console.log(prev.slice(), 'HERE');
-        //     return prev.slice();
-        // });
-    }, []);
-
     const calculateCardHeight = (elements: ReactElement[]) => {
-        console.log(elements, 'wwwwwwwwww__');
         return elements.reduce((acc: number, element: any) => {
-            // console.log(element?.height, 'ELEMENT__');
-            // console.log(element.children[0].getLocalBounds(), 'CALC__')
             return element ? acc + element.height : acc;
         }, 0);
     };
 
     const calculatePrevBlocksHeight = (index: number) => {
         const getPrevBlockHeight = (prevBlocks: ReactElement[]) => {
-            console.log(prevBlocks, '__prevBlocks__');
             return calculateCardHeight(prevBlocks);
         };
-        console.log(contentItems, 'yyyyyyyyyy__');
+
         return index !== 0 ? getPrevBlockHeight(contentItems.slice(0, index)) : 0;
     };
 
@@ -182,28 +154,18 @@ export default function BotConstructor() {
                 return (
                     <MessageContainer
                         rectPadding={rectPadding}
-                        height={messageContainerHeight}
-                        onChangeHeight={onChangeHeight}
                         {...props}
                     />
                 );
         }
     }, []);
 
-    // const getRef = useMemo(() => {
-    //     return (index: number) => (element: ReactElement) => {
-    //         refs.current[index] = element;
-    //     };
-    // }, [])
-
     const cardContent = useMemo(() => {
-        console.log('MEMO');
         return blockTypes.map((blockType, index, allItems) => {
             const ref = (element: ReactElement) => {
                 refs.current[index] = element;
             }
             const id = blockType.id;
-            console.log(refs.current, 'CURRENT__');
 
             const extraPadding = lastRectPaddingSum = 
                 index > 0 ?
@@ -212,7 +174,6 @@ export default function BotConstructor() {
                         rectPadding * (index + 1) :
                     rectPadding * (index + 1);
 
-            console.log(extraPadding / 15, 'extraPadding');
 
             return getReactElementByBlockType(blockType.type, {
                 ref,
@@ -223,52 +184,75 @@ export default function BotConstructor() {
                 lastX,
                 lastY,
                 prevBlocksHeight: calculatePrevBlocksHeight(index),
-                calculatePrevBlocksHeight,
                 verticalMargin: rectPadding * (index + 1),
                 ...(blockType.props ? blockType.props : {}),
             });
         });
     }, [lastX, lastY, contentItems, blockTypes]);
 
-    console.log(cardContent, 'EEEEEE_—');
-
     useEffect(() => {
         refs.current = [];
-        console.log('RENDER__');
+
         const timerId = setTimeout(() => {
             const cardHeight = calculateCardHeight(refs.current);
             const totalCardHeight = cardHeight + (rectPadding * (refs.current.length + 1));
-            console.log(refs.current, 'TTTTTTTT__')
             setCardHeight(totalCardHeight);
             setContentItems(refs.current);
         }, 0);
 
-        console.log(lastY, 'QQQQQQQQ__');
-
         return () => clearTimeout(timerId);
     }, [blockTypes]);
+
+    const setLastXC = useCallback((x: any) => {
+        setLastX(x);
+    }, []);
+    const setLastYC = useCallback((y: any) => {
+        setLastY(y);
+    }, []);
+    const setVisibleBorderC = useCallback((isVisible: any, text: string) => {
+        setVisibleBorder(isVisible)
+        console.log(text);
+    }, []);
+
+    const draw = useCallback((instance: any, borderColor: string) => {
+        borderColor && instance.lineStyle(3, borderColor);
+        instance.beginFill('0xffffff');
+        instance.drawRoundedRect(lastX, lastY, 350, cardHeight, 20);
+        instance.endFill();
+
+        console.log('DRAW_RENDER_FRAME');
+        instance.lineStyle(3, borderColor);
+        instance.clear();
+    }, [borderColor]);
     
     return (
         <>
             <Stage options={{ backgroundColor: 0xe3e3e3, height: 1000, width: 1000 }}>
                 <DraggableContainer
-                    setLastX={setLastX}
-                    setLastY={setLastY}
+                    setLastX={setLastXC}
+                    setLastY={setLastYC}
+                    lastX={lastX}
+                    lastY={lastY}
+                    setVisibleBorder={setVisibleBorderC}
+                    // x={lastX}
+                    // y={lastY}
+                    // draw={(instance: any) => {
+                    //     // console.log(instance, '__INSSSSSS_');
+                    //     setVisibleBorder(true);
+                    // }}
+                    // pointerover={() => setVisibleBorderC(true, 'OVER')}
+                    // pointerout={() => setVisibleBorderC(false, 'OUT')}
                 >
                     <Rect
                         x={lastX}
                         y={lastY}
                         width={350}
                         height={cardHeight}
-                        bg={0xffffff}
+                        bg={'0xffffff'}
+                        borderColor={isVisibleBorder ? borderColor : null}
+                        // draw={draw}
                     >
                         {cardContent}
-                        {/* <HeaderContainer
-                            id={blockTypes[0].id}
-                            lastX={lastX}
-                            lastY={lastY}
-                            prevBlocksHeight={calculatePrevBlocksHeight(0)}
-                        /> */}
                     </Rect>
                 </DraggableContainer>
             </Stage>

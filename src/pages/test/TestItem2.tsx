@@ -1,7 +1,7 @@
 import React, {useEffect, memo, forwardRef} from 'react';
 
 const areEq = (prev: any, next: any) => {
-    console.log(prev, 'PREV');
+    // console.log(prev, 'PREV');
     return true;
 };
 
@@ -14,11 +14,11 @@ export const TestItem2 = memo(
         children
     }, ref) => {
         useEffect(() => {
-            console.log(id, 'TEST_2');
+            // console.log(id, 'TEST_2');
             changeName(name, id);
 
             return () => {
-                console.log(`unmount ${id}`);
+                // console.log(`unmount ${id}`);
             };
         }, []);
 
