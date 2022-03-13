@@ -10,7 +10,7 @@ const TYPE = "DraggableContainer";
 
 let externalLastX: number = 0;
 let externalLastY: number = 0;
-
+let isMoved: boolean = false;
 export class Behavior {
   dragStart: any;
   dragEnd: any;
@@ -62,42 +62,27 @@ export class Behavior {
       const newPosition = data.getLocalPosition(instance.parent);
 
       draggedObject = instance;
-      draggedObject.pivot.set(newPosition.x, newPosition.y); // Добавил хардкод начальных значений координат
+      draggedObject.pivot.set(newPosition.x, newPosition.y);
 
       console.log(newPosition, '__newPosition__');
-      if (this.isInited) {
-        console.log('NOT_INITED');
-        graphic.position.x = externalLastX - 30;
-        graphic.position.y = externalLastY - 20;
-      } else {
-        console.log('INITED');
-        this.isInited = true;
-      }
+      graphic.position.x = externalLastX;
+      graphic.position.y = externalLastY;
 
       draggedObject.position.x = newPosition.x;
       draggedObject.position.y = newPosition.y;
       
       const globalTextObj = instance.children[0].children[0].getBounds();
-
+      
+      console.log('globalTextObj.x: ', globalTextObj.x);
       this.lastPivotX = newPosition.x - globalTextObj.x;
       this.lastPivotY = newPosition.y - globalTextObj.y;
 
       if (typeof draggedObject.onDragStart === "function") draggedObject.onDragStart(instance);
     };
 
-    this.dragEnd = (e: any) => {
-      const newPosition = e.data.getLocalPosition(instance.parent);
-
-      externalLastX = newPosition.x - this.lastPivotX;
-      externalLastY = newPosition.y - this.lastPivotY;
-
-      draggedObject = null;
-
-      if (typeof instance.onDragEnd === "function") instance.onDragEnd(instance);
-    };
-
     this.dragMove = (e: any) => {
       if (draggedObject === null) return;
+      isMoved = true;
 
       const data = e.data;
       const newPosition = data.getLocalPosition(instance.parent);
@@ -112,6 +97,17 @@ export class Behavior {
       console.log('x:', this.lastPivotX, 'y:', this.lastPivotY);
 
       if (typeof instance.onDragMove === "function") instance.parent.onDragMove(instance);
+    };
+
+    this.dragEnd = (e: any) => {
+      const newPosition = e.data.getLocalPosition(instance.parent);
+      console.log('newPosition.x: ', newPosition.x);
+      console.log('this.lastPivotX: ', this.lastPivotX);
+      externalLastX = newPosition.x - this.lastPivotX - 15 - this.lastX + (isMoved ? 1.5 : 0); // padding в контейнере для текста (серый прямоугольник) (rectPadding) + начальное значение lastX + 1/2 border белого прямоугольника
+      externalLastY = newPosition.y - this.lastPivotY - 15 - this.lastY + (isMoved ? 1.5 : 0); // padding только внутри серого прямоугольника (rectPadding) + начальное значение lastY + 1/2 border белого прямоугольника
+      draggedObject = null;
+      isMoved = false;
+      if (typeof instance.onDragEnd === "function") instance.onDragEnd(instance);
     };
 
     instance.on("mousedown", this.dragStart);
