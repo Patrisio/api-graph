@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { DOWNLOAD_FILE_INPUT } from "../common/constants";
+import {HOST} from '../../../config';
 
 export const useYAMLFile = () => {
   const [yaml, setYaml] = useState(null);
@@ -26,7 +27,7 @@ export const useYAMLFile = () => {
       });
       formData.append("yaml", myBlob, (yaml as any).name);
 
-      const response = await fetch("/getData", {
+      const response = await fetch(`${HOST}/getData`, {
         method: "POST",
         body: formData,
       });
