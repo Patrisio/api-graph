@@ -26,7 +26,7 @@ export default function SidebarContentContainer({
 }: SidebarContentProps) {
     const depsTreeData = prevHighlightedNodes[currentPointerIndex as number]?.children;
     const isVisibleDepsTree = prevHighlightedNodes.length > 0 && isNumber(currentPointerIndex);
-    console.log(isVisibleDepsTree, 'isVisibleDepsTree__UP');
+
     const [nodeName, setNodeName] = useState<string>('');
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

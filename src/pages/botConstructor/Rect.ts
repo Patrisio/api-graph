@@ -15,6 +15,7 @@ export class Behavior extends PIXI.Graphics {
     }
 
     customApplyProps(instance: any, oldProps: any, newProps: any) {
+        instance.clear();
         const { bg, x, y, width, height, borderRadius = 20, borderColor, draw } = newProps;
 
         // if (typeof oldProps !== "undefined") {

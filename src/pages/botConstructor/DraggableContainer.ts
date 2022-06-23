@@ -22,17 +22,35 @@ export class Behavior {
   lastX: any;
   lastY: any;
   isInited: boolean = false;
+  pointerovercapture: any;
 
   customDisplayObject() {
+    console.log('NOW__');
     return new PIXI.Container();
   }
 
   customDidAttach(instance: any) {
+    const renderRect = (graphic: any, options: any) => {
+      const {borderWidth = 3, borderColor} = options;
+
+      graphic.clear();
+      graphic.lineStyle(borderWidth, borderColor);
+      graphic.beginFill('0xffffff');
+      graphic.drawRoundedRect(lastX, lastY, width, height, 20);
+      graphic.endFill();
+    };
+
     instance.interactive = true;
     const {lastX, lastY, width, height} = instance;
     instance.cursor = "pointer";
 
     const graphic = instance.children[0];
+    console.log(graphic, '__INSTANNNNNN');
+
+    renderRect(graphic, {
+      borderWidth: 0,
+      borderColor: null,
+    });
     // console.log(graphic, 'graphic');
     console.log('externalLastX: ', externalLastX);
     console.log('externalLastY: ', externalLastY);
@@ -42,19 +60,12 @@ export class Behavior {
     let draggedObject: any = null;
 
     this.pointerOver = (e: any) => {
-      instance.children[0].clear();
-      instance.children[0].lineStyle(3, '0x4d4dff');
-      instance.children[0].beginFill('0xffffff');
-      instance.children[0].drawRoundedRect(lastX, lastY, width, height, 20);
-      instance.children[0].endFill();
+      console.log('Over');
+      renderRect(graphic, {borderColor: '0x4d4dff'});
     };
 
     this.pointerOut = (e: any) => {
-      instance.children[0].clear();
-      instance.children[0].lineStyle(0, null);
-      instance.children[0].beginFill('0xffffff');
-      instance.children[0].drawRoundedRect(lastX, lastY, width, height, 20);
-      instance.children[0].endFill();
+      renderRect(graphic, {borderWidth: 0, borderColor: null});
     };
 
     this.dragStart = (e: any) => {
@@ -110,14 +121,22 @@ export class Behavior {
       if (typeof instance.onDragEnd === "function") instance.onDragEnd(instance);
     };
 
+    this.pointerovercapture = () => {
+      console.log('QQQQQQQQQ__');
+    };
+
     instance.on("mousedown", this.dragStart);
     instance.on("mouseup", this.dragEnd);
     instance.on("mousemove", this.dragMove);
     instance.on('pointerover', this.pointerOver);
     instance.on('pointerout', this.pointerOut);
+    instance.on('pointerleave', this.pointerovercapture);
   }
 
   customWillDetach(instance: any) {
+    console.log('UNMOUNT');
+    // const graphic = instance.children[0];
+    // graphic.destroy();
     instance.off("mousedown", this.dragStart as any);
     instance.off("mouseup", this.dragEnd);
     instance.off("mousemove", this.dragMove);

@@ -20,14 +20,14 @@ let lastRectPaddingSum = 0;
 const borderColor = '0x4d4dff';
 
 export default function BotConstructor() {
-    const [pivotX, setPivotX] = React.useState<number>(0);
-    const [pivotY, setPivotY] = React.useState<number>(0);
+    const [pivotX, setPivotX] = useState<number>(0);
+    const [pivotY, setPivotY] = useState<number>(0);
 
-    const [posX, setPosX] = React.useState<number>(0);
-    const [posY, setPosY] = React.useState<number>(0);
+    const [posX, setPosX] = useState<number>(0);
+    const [posY, setPosY] = useState<number>(0);
 
-    const [lastX, setLastX] = React.useState(15);
-    const [lastY, setLastY] = React.useState(5);
+    const [lastX, setLastX] = useState(15);
+    const [lastY, setLastY] = useState(5);
 
     const [cardHeight, setCardHeight] = useState(0);
     const [contentItems, setContentItems] = useState<any[]>([]);
@@ -116,6 +116,7 @@ export default function BotConstructor() {
 
         setBlockTypes((prev: any) => {
             prev.splice(1, 1, {
+                id: nanoid(),
                 type: 'message',
                 props: {
                     text: value,
@@ -215,6 +216,7 @@ export default function BotConstructor() {
     }, []);
 
     const draw = useCallback((instance: any, borderColor: string) => {
+        instance.clear();
         borderColor && instance.lineStyle(3, borderColor);
         instance.beginFill('0xffffff');
         instance.drawRoundedRect(lastX, lastY, 350, cardHeight, 20);
@@ -229,17 +231,19 @@ export default function BotConstructor() {
         <>
             <Stage options={{ backgroundColor: 0xe3e3e3, height: 1000, width: 1000 }}>
                 <DraggableContainer
-                    setLastX={setLastXC}
-                    setLastY={setLastYC}
+                    // setLastX={setLastXC}
+                    // setLastY={setLastYC}
                     lastX={lastX}
                     lastY={lastY}
                     setVisibleBorder={setVisibleBorderC}
                     // x={lastX}
                     // y={lastY}
-                    // draw={(instance: any) => {
-                    //     // console.log(instance, '__INSSSSSS_');
-                    //     setVisibleBorder(true);
-                    // }}
+                    interactive={true}
+                    draw={(instance: any) => {
+                        instance.clear();
+                        // console.log(instance, '__INSSSSSS_');
+                        // setVisibleBorder(true);
+                    }}
                     // pointerover={() => setVisibleBorderC(true, 'OVER')}
                     // pointerout={() => setVisibleBorderC(false, 'OUT')}
                 >
@@ -250,7 +254,7 @@ export default function BotConstructor() {
                         height={cardHeight}
                         bg={'0xffffff'}
                         borderColor={isVisibleBorder ? borderColor : null}
-                        // draw={draw}
+                        draw={draw}
                     >
                         {cardContent}
                     </Rect>
