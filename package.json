@@ -42,6 +42,7 @@
       "react-app/jest"
     ]
   },
+  "proxy": "https://sberbank-api.onrender.com",
   "browserslist": {
     "production": [
       ">0.2%",
