@@ -24,8 +24,10 @@
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
+    "react-window": "^1.8.8",
     "typescript": "^4.5.4",
-    "web-vitals": "^2.1.2"
+    "web-vitals": "^2.1.2",
+    "yaml": "^2.1.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -39,7 +41,7 @@
       "react-app/jest"
     ]
   },
-  "proxy": "http://localhost:8287",
+  "proxy": "http://localhost:8300",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -53,6 +55,7 @@
     ]
   },
   "devDependencies": {
-    "@types/d3": "^7.1.0"
+    "@types/d3": "^7.1.0",
+    "@types/react-window": "^1.8.5"
   }
 }

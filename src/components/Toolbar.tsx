@@ -11,7 +11,7 @@ export default function Toolbar({
     return (
         <MUIToolbar>
             <Typography variant='h6' noWrap sx={{ flexGrow: 1 }} component='div'>
-                Визуализация зависимостей в EMRM-API
+                Визуализация зависимостей EMRM-API
             </Typography>
             <IconButton
                 color='inherit'
@@ -19,6 +19,7 @@ export default function Toolbar({
                 edge='end'
                 onClick={handleOpen}
                 sx={{ ...(open && { display: 'none' }) }}
+                style={{position: 'fixed', right: 36}}
             >
                 <MenuIcon />
             </IconButton>

@@ -33,3 +33,4 @@ export enum METHODS {
 };
 
 export const GRAPH_ROOT_CLASS_NAME = 'hierarchy-graph-root';
+export const SIDEBAR_WIDTH = 572;

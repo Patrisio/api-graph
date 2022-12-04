@@ -60,7 +60,7 @@ export default function useHierarchyGraph(graphData: any) {
             text: false,
         });
 
-        if (foundNodeChildren.length > 0) {
+        if (foundNodeChildren && foundNodeChildren.length > 0) {
             recursiveTraverse(
                 foundNodeDepsIds,
                 foundNodeChildren,
@@ -105,17 +105,21 @@ export default function useHierarchyGraph(graphData: any) {
 
       	const nodesList = filteredNodes.nodes();
 		filteredNodes.each(({data: d3Node}: any, i: number) => {
+            const {typeData, description, id, type, children} = d3Node;
+            
         	const currentNode = nodesList[i];
 			setPrevHighlightedNodes(prev => ([
 				...prev,
 				{
-					id: d3Node.id,
-					color: d3Node.type,
-					children: d3Node.children,
+					id,
+                    ...(typeData && {typeData}),
+                    ...(description && {description}),
+					color: type,
+					children,
 					scrollTop: getScrollTop(currentNode),
 				}
 			]));
-			highlightCircleNodeById(d3Node.id);
+			highlightCircleNodeById(id);
 		});
    	};
 
@@ -124,7 +128,7 @@ export default function useHierarchyGraph(graphData: any) {
         resetOpacityForAllNodes();
         setFoundEntitiesCount(null);
         setPrevHighlightedNodes([]);
-        disableAnimationToSelectedCircleNode(prevHighlightedNodes[(currentPointerIndex as number)].id);
+        disableAnimationToSelectedCircleNode(prevHighlightedNodes[(currentPointerIndex as number)]?.id);
     };
 
     const resetNodesHighlight = () => {
@@ -139,7 +143,7 @@ export default function useHierarchyGraph(graphData: any) {
         setPrevHighlightedNodes([]);
     };
 
-    const handleGraph = (entityName: string) => {
+    const handleGraph = (entityName: string, graphData: any) => {
         const foundNode = findNodeByName(entityName, graphData);
         foundNode ? updateGraphByFoundNode(foundNode) : updateGraphByNotFoundNode();
     };
@@ -158,6 +162,10 @@ export default function useHierarchyGraph(graphData: any) {
 			activateAnimationToSelectedCircleNode(selectedNode.id);
 		}
 	}, [currentPointerIndex]);
+
+    useEffect(() => {
+        setPrevHighlightedNodes([]);
+    }, [graphData]);
 
     return {
         handleGraph,

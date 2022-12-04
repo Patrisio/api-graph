@@ -1,16 +1,20 @@
 import React, {useState, ChangeEvent} from 'react';
-import {DepsTreeContainer} from './DepsTreeContainer';
-import { isNumber } from 'lodash';
+import {isNumber} from 'lodash';
 import SidebarContentView from '../views/SidebarContentView';
+import {DepsTreeContainer} from './DepsTreeContainer';
 
 type SidebarContentProps = {
     foundEntitiesCount: number | null,
     prevHighlightedNodes: any,
     currentPointerIndex: number | null,
+    dependencyListMap: any
+    fullGraphData: any;
     movePointer: VoidFunction,
     resetNodesHighlight: VoidFunction,
-    handleGraph: (entityName: string) => void,
+    handleGraph: (entityName: string, graphData: any) => void,
     resetGraph: VoidFunction,
+    setFrontApi: any;
+    updateGraphData: any;
 };
 
 let prevEntityName: string;
@@ -19,17 +23,24 @@ export default function SidebarContentContainer({
     foundEntitiesCount,
     prevHighlightedNodes,
     currentPointerIndex,
+    dependencyListMap,
+    fullGraphData,
     movePointer,
     resetNodesHighlight,
     handleGraph,
     resetGraph,
+    setFrontApi,
+    updateGraphData,
 }: SidebarContentProps) {
     const depsTreeData = prevHighlightedNodes[currentPointerIndex as number]?.children;
+    const rootDepsTreeData = {
+        description: prevHighlightedNodes[currentPointerIndex as number]?.description,
+        typeData: prevHighlightedNodes[currentPointerIndex as number]?.typeData,
+    }
     const isVisibleDepsTree = prevHighlightedNodes.length > 0 && isNumber(currentPointerIndex);
-    console.log(isVisibleDepsTree, 'isVisibleDepsTree__UP');
     const [nodeName, setNodeName] = useState<string>('');
 
-    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const updateNodeName = (event: ChangeEvent<HTMLInputElement>) => {
         setNodeName(event.target.value);
     };
 
@@ -39,15 +50,28 @@ export default function SidebarContentContainer({
         }
     };
 
-    const highlightGraphLinksByNodeName = (e: any) => {
-        if (e.key !== 'Enter') return;
+    const setDependencyListToGraphData = (dependencyName: string) => {
+        const dependencyList = dependencyListMap[dependencyName];
 
-        e.preventDefault();
-        const entityName = e.target.value;
-        
+        if (dependencyList) {
+            updateGraphData(dependencyList);
+        }
+    };
+
+    const setFullGraphData = (fullGraphData: any) => {
+        updateGraphData(fullGraphData);
+    };
+
+    const highlightGraphLinksByNodeName = (entityName: string, graphData?: any, forceHandleGraph: boolean = false) => {
         if (entityName === '') {
             setNodeName('');
             resetGraph();
+            return;
+        }
+
+        if (prevEntityName === entityName && forceHandleGraph) {
+            movePointer();
+            handleGraph(entityName, graphData);
             return;
         }
 
@@ -60,7 +84,7 @@ export default function SidebarContentContainer({
             resetNodesHighlight();
         }
         
-        handleGraph(entityName);
+        handleGraph(entityName, graphData);
         prevEntityName = entityName;
     }
 
@@ -77,13 +101,18 @@ export default function SidebarContentContainer({
             depsTreeUI={
                 <DepsTreeContainer
                     deps={depsTreeData}
+                    rootDepsTreeData={rootDepsTreeData}
                     isVisibleDepsTree={isVisibleDepsTree}
                 />
             }
+            fullGraphData={fullGraphData}
             isVisibleCoincidenceNotice={foundEntitiesCount !== null}
             coincidenceNoticeText={getCoincidenceNoticeText()}
             highlightGraphLinksByNodeName={highlightGraphLinksByNodeName}
-            handleChange={handleChange}
+            updateNodeName={updateNodeName}
+            setDependencyListToGraphData={setDependencyListToGraphData}
+            setFullGraphData={setFullGraphData}
+            setFrontApi={setFrontApi}
             resetGraph={() => {
                 setNodeName('');
                 resetGraph();

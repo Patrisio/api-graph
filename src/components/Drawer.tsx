@@ -33,7 +33,7 @@ export default function Drawer({
         >
             <DrawerHeader>
                 <IconButton onClick={handleClose}>
-                <ChevronRightIcon />
+                    <ChevronRightIcon />
                 </IconButton>
             </DrawerHeader>
             {children}

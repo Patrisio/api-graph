@@ -14,7 +14,7 @@ export default function DepsTreeView({
         <TreeView
             defaultCollapseIcon={<ExpandMoreIcon />}
             defaultExpandIcon={<ChevronRightIcon />}
-            sx={{ height: 240, flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
+            sx={{ flexGrow: 1, maxWidth: 400, overflowY: 'auto' }}
         >
             {children}
         </TreeView>

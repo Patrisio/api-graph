@@ -4,17 +4,17 @@ import TreeItem from '@mui/lab/TreeItem';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import {isBoolean, isArray} from 'lodash';
+import Divider from '@mui/material/Divider';
 
 type DepsTreeContainerType = {
     deps: any,
+    rootDepsTreeData: any;
     isVisibleDepsTree: boolean,
 };
 
-const areEqualProps = (prev: any, next: any) =>
-    prev.isVisibleDepsTree === next.isVisibleDepsTree;
-
 export const DepsTreeContainer = memo(({
     deps,
+    rootDepsTreeData,
     isVisibleDepsTree
 }: DepsTreeContainerType) => {
     const depDescription = (depPropsList: any[]) => {
@@ -147,10 +147,52 @@ export const DepsTreeContainer = memo(({
         return treeItemsList;
     };
 
+    const treeItems = renderTreeItems(deps);
+
     return (
         isVisibleDepsTree ?
-        <DepsTreeView>
-            {renderTreeItems(deps)}
-        </DepsTreeView> : null
+        <>
+            {
+                (rootDepsTreeData?.description || rootDepsTreeData?.typeData) &&
+                <Divider style={{margin: '10px 0'}}>НАЙДЕННАЯ СУЩНОСТЬ</Divider>}
+            {
+                rootDepsTreeData?.description && 
+                <div style={{display: 'flex', pointerEvents: 'none'}}>
+                    <TreeItem
+                        nodeId={'description'}
+                        label={'description'}
+                    />
+                    <Typography
+                        variant='body2'
+                        gutterBottom
+                        sx={{ marginBottom: '0' }}
+                    >
+                        {rootDepsTreeData.description}
+                    </Typography>
+                </div>
+            }
+            {
+                rootDepsTreeData?.typeData && 
+                <div style={{display: 'flex', pointerEvents: 'none'}}>
+                    <TreeItem
+                        nodeId={'description'}
+                        label={'type'}
+                    />
+                    <Typography
+                        variant='body2'
+                        gutterBottom
+                        sx={{ marginBottom: '0' }}
+                    >
+                        {rootDepsTreeData.typeData}
+                    </Typography>
+                </div>
+            }
+
+            {!!treeItems.length && <Divider style={{margin: '10px 0'}}>ДОЧЕРНИЕ СУЩНОСТИ</Divider>}
+
+            <DepsTreeView>
+                {treeItems}
+            </DepsTreeView>
+        </> : null
     );
-}, areEqualProps)
+});
